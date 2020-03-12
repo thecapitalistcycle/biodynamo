@@ -46,6 +46,7 @@
 #include <vtkSMRenderViewProxy.h>
 #include <vtkSMSaveScreenshotProxy.h>
 #include <vtkSMViewLayoutProxy.h>
+#include <vtkSMUtilities.h>
 
 #include "core/visualization/paraview/helper.h"
 #include "core/util/string.h"
@@ -174,7 +175,6 @@ class InSituPipeline : public vtkCPPipeline {
         controller_->PreInitializeProxy(glyph);
         std::string object_name_str = object_name;
         std::string glyph_name = object_name_str + "_Glyph";
-
         vtkSMPropertyHelper(glyph, "Input").Set(producer);
         vtkSMPropertyHelper(glyph, "Source").Set(GetSource(glyph, source_name));
         vtkSMPropertyHelper(glyph, "ScaleMode", true).Set(scale_mode);
@@ -182,7 +182,7 @@ class InSituPipeline : public vtkCPPipeline {
         vtkSMPropertyHelper(glyph, "GlyphMode", true).Set(0);
 
         if (scale_mode == 0) {
-          vtkSMPropertyHelper(glyph, "Scalars")
+          vtkSMPropertyHelper(glyph, "ScaleArray")
               .SetInputArrayToProcess(vtkDataObject::POINT, "diameter_");
         } else if (scale_mode == 4) {
           vtkSMPropertyHelper(glyph, "X-Scaling")
@@ -393,9 +393,19 @@ class InSituPipeline : public vtkCPPipeline {
    // vtkRenderWindowInteractor to enable interaction.
   //  view->MakeRenderWindowInteractor();
 
+    auto* cells = proxy_manager_->GetProxy("sources", "Cell_Glyph");
 
     vtkSMViewProxy* viewProxy = view.Get();//view->getViewProxy();
     vtkSMViewLayoutProxy* layout = vtkSMViewLayoutProxy::FindLayout(viewProxy);
+
+    //controller_->PreInitializeProxy(cells);
+    //cells->UpdateVTKObjects();
+    //controller_->PostInitializeProxy(cells);
+    //controller_->RegisterPipelineProxy(cells, "Cell");
+    controller_->Show(vtkSMSourceProxy::SafeDownCast(cells), 0, viewProxy);
+    
+    view->ResetCamera();
+    //view->ZoomTo(cells);
 
     vtkSmartPointer<vtkSMProxy> proxy;
     proxy.TakeReference(session_manager_->NewProxy("misc", "SaveScreenshot"));
@@ -410,8 +420,11 @@ class InSituPipeline : public vtkCPPipeline {
     auto filename = Concat("foo-bar-baz-", time_step , ".png");
     shProxy->UpdateDefaultsAndVisibilities(filename.c_str());
     controller_->PostInitializeProxy(shProxy);
-
-    shProxy->WriteImage(filename.c_str());
+  
+    const vtkVector2i isize(512, 512);
+    auto image = shProxy->CaptureImage(viewProxy, isize);
+    vtkSMUtilities::SaveImage(image, filename.c_str(), 9); 
+      //shProxy->WriteImage(filename.c_str());
 
 
     return 1;
