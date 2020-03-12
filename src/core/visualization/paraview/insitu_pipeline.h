@@ -42,8 +42,13 @@
 #include <vtkSMSessionProxyManager.h>
 #include <vtkSMSourceProxy.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkSMExportProxyDepot.h>
+#include <vtkSMRenderViewProxy.h>
+#include <vtkSMSaveScreenshotProxy.h>
+#include <vtkSMViewLayoutProxy.h>
 
 #include "core/visualization/paraview/helper.h"
+#include "core/util/string.h"
 
 #endif  // ifndef __ROOTCLING__
 
@@ -62,20 +67,20 @@ class InSituPipeline : public vtkCPPipeline {
     session_manager_ = proxy_manager_->GetActiveSessionProxyManager();
     controller_ = vtkSMParaViewPipelineControllerWithRendering::New();
     plugin_manager_ = vtkSMPluginManager::New();
-//#ifdef __APPLE__
-    //std::string plugin_path =
-        //std::string(std::getenv("BDM_INSTALL_DIR")) +
-        //"/biodynamo/lib/pv_plugin/libBDMGlyphFilter.dylib";
-//#else
-    //std::string plugin_path = std::string(std::getenv("BDM_INSTALL_DIR")) +
-                              //"/biodynamo/lib/pv_plugin/libBDMGlyphFilter.so";
-//#endif
-    // Load custom plugin to enable cylinder glyph scaling
-    //if (!plugin_manager_->LoadLocalPlugin(plugin_path.c_str())) {
-      //Fatal("LoadLocalPlugin",
-            //"Was unable to load our custom visualzation plugin. Have you "
-            //"sourced the BioDynaMo environment?");
-    //}
+// #ifdef __APPLE__
+//     std::string plugin_path =
+//         std::string(std::getenv("BDM_INSTALL_DIR")) +
+//         "/biodynamo/lib/pv_plugin/libBDMGlyphFilter.dylib";
+// #else
+//     std::string plugin_path = std::string(std::getenv("BDM_INSTALL_DIR")) +
+//                               "/biodynamo/lib/pv_plugin/libBDMGlyphFilter.so";
+// #endif
+//     // Load custom plugin to enable cylinder glyph scaling
+//     if (!plugin_manager_->LoadLocalPlugin(plugin_path.c_str())) {
+//       Fatal("LoadLocalPlugin",
+//             "Was unable to load our custom visualzation plugin. Have you "
+//             "sourced the BioDynaMo environment?");
+//     }
   }
 
   virtual ~InSituPipeline() {
@@ -293,7 +298,8 @@ class InSituPipeline : public vtkCPPipeline {
   }
 
   int CoProcess(vtkCPDataDescription* data_description) override {
-	  if (!data_description) {
+    std::cout << "Coprocessing ..." << std::endl;
+    if (!data_description) {
       vtkWarningMacro(
           "The data description is empty. There is nothing to visualize!");
       return 0;
@@ -302,10 +308,111 @@ class InSituPipeline : public vtkCPPipeline {
       return 1;
     }
 
+
     // Update the producers and do live visualization
     this->UpdateProducers(data_description);
     this->UpdateFilters(data_description);
-    this->DoLiveVisualization(data_description);
+	  this->DoLiveVisualization(data_description);
+
+    // ------------------------------------------------------------------------
+    // vtkSmartPointer<vtkSMWriterProxy> writer;
+    // writer.TakeReference(
+    //   vtkSMWriterProxy::SafeDownCast(sessionProxyManager->NewProxy("writers", "XMLPPolyDataWriter")));
+    // vtkSMInputProperty* writerInputConnection =
+    //   vtkSMInputProperty::SafeDownCast(writer->GetProperty("Input"));
+    // writerInputConnection->SetInputConnection(0, producer, 0);
+    // vtkSMStringVectorProperty* fileName =
+    //   vtkSMStringVectorProperty::SafeDownCast(writer->GetProperty("FileName"));
+    //
+    // std::ostringstream o;
+    // o << dataDescription->GetTimeStep();
+    // std::string name = this->FileName + o.str() + ".pvtp";
+    //
+    // fileName->SetElement(0, name.c_str());
+    // writer->UpdatePropertyInformation();
+    // writer->UpdateVTKObjects();
+    // writer->UpdatePipeline();
+
+    // vtkSmartPointer<vtkSMRenderViewProxy> view;
+    // view.TakeReference(vtkSMRenderViewProxy::SafeDownCast(session_manager_->NewProxy("views", "RenderView")));
+    //
+    // // Initialize the view.
+    // controller_->InitializeProxy(view.Get());
+    //
+    // view->UpdateVTKObjects();
+    //
+    // // Registration is optional. For an application, you have  to decide if you
+    // // are going to register proxies with proxy manager or not. Generally,
+    // // registration helps with state save/restore and hence may make sense for
+    // // most applications.
+    // controller_->RegisterViewProxy(view.Get());
+    //
+    // auto* ed = session_manager_->GetExportDepot();
+    // std::cout << "export depot " << ed << std::endl;
+    // std::cout << "has screen p " << ed->HasScreenshotProxy("group", "format") << std::endl;
+    // if (ed->HasScreenshotProxy("group", "format")) {
+    //   auto* ssProxy = vtkSMSaveScreenshotProxy::SafeDownCast(
+    //     ed->GetScreenshotProxy(view, "view-name", "ss-name"));
+    //   ssProxy->WriteImage("foo-bar-baz.png");
+    // }
+
+    // vtkSmartPointer<vtkSMSaveScreenshotProxy> view;
+    // view.TakeReference(vtkSMSaveScreenshotProxy::SafeDownCast(session_manager_->NewProxy("views", "RenderView")));
+    // controller_->InitializeProxy(view.Get());
+    // // view->UpdateVTKObjects();
+    // controller_->RegisterViewProxy(view.Get());
+    // view->WriteImage("foo-bar-baz.png");
+
+    // Get the time information from the data
+    double time = data_description->GetTime();
+    vtkIdType time_step = data_description->GetTimeStep();
+    // for (auto it = producer_map_.begin(); it != producer_map_.end(); it++) {
+    //   // Update the pipeline for the current time_step
+    //   it->second->UpdatePipeline(time);
+    // }
+    // for (auto it = this->filter_map_.begin(); it != this->filter_map_.end();
+    //      it++) {
+    //   it->second->UpdatePipeline(time);
+    // }
+
+   vtkSmartPointer<vtkSMRenderViewProxy> view;
+   view.TakeReference(vtkSMRenderViewProxy::SafeDownCast(session_manager_->NewProxy("views", "RenderView")));
+
+   // You can create as many controller instances as needed. Controllers have
+   // no persistent state.
+  //  vtkNew<vtkSMParaViewPipelineControllerWithRendering> controller;
+   view->UpdateVTKObjects();
+
+     // Registration is optional. For an application, you have  to decide if you
+   // are going to register proxies with proxy manager or not. Generally,
+ // registration helps with state save/restore and hence may make sense for
+ // most applications.
+  //  controller_->RegisterViewProxy(view.Get());
+
+   // Since in this example we are not using Qt, we setup a standard
+   // vtkRenderWindowInteractor to enable interaction.
+  //  view->MakeRenderWindowInteractor();
+
+
+    vtkSMViewProxy* viewProxy = view.Get();//view->getViewProxy();
+    vtkSMViewLayoutProxy* layout = vtkSMViewLayoutProxy::FindLayout(viewProxy);
+
+    vtkSmartPointer<vtkSMProxy> proxy;
+    proxy.TakeReference(session_manager_->NewProxy("misc", "SaveScreenshot"));
+    auto* shProxy = vtkSMSaveScreenshotProxy::SafeDownCast(proxy);
+    if (!shProxy) {
+      std::cout << "ERROR with proxy" << std::endl;
+    }
+
+    controller_->PreInitializeProxy(shProxy);
+    vtkSMPropertyHelper(shProxy, "View").Set(viewProxy);
+    vtkSMPropertyHelper(shProxy, "Layout").Set(layout);
+    auto filename = Concat("foo-bar-baz-", time_step , ".png");
+    shProxy->UpdateDefaultsAndVisibilities(filename.c_str());
+    controller_->PostInitializeProxy(shProxy);
+
+    shProxy->WriteImage(filename.c_str());
+
 
     return 1;
   }
@@ -368,3 +475,4 @@ class InSituPipeline {
 }  // namespace bdm
 
 #endif  // CORE_VISUALIZATION_PARAVIEW_INSITU_PIPELINE_H_
+
