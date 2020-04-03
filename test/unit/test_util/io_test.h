@@ -25,6 +25,10 @@
 
 namespace bdm {
 
+// Hide testing::Test from the generated dictionary.
+// Otherwise ROOT is unable to load it into cling.
+#ifndef __ROOTCLING__
+
 /// Test fixture for io tests that follow the same form
 /// Usage:
 ///
@@ -47,12 +51,15 @@ class IOTest : public ::testing::Test {
   static constexpr char const* kJsonFile = "io-test.json";
 };
 
+#endif  // __ROOTCLING__
+
 /// Writes backup to file and reads it back into restored
 /// Outside the test fixture so it can be called in a function from the header.
 /// TEST_F can't be used inside a header due to multiple references linking
 /// error and must be placed in a source file.
 template <typename T>
 void BackupAndRestore(const T& backup, T** restored) {
+#ifndef __ROOTCLING__
   remove(IOTest::kRootFile);
   remove(IOTest::kJsonFile);
 
@@ -66,6 +73,7 @@ void BackupAndRestore(const T& backup, T** restored) {
 
   // read back
   GetPersistentObject(IOTest::kRootFile, "T", *restored);
+#endif  // __ROOTCLING__
 }
 
 }  // namespace bdm
