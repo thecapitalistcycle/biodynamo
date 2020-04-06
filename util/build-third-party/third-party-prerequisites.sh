@@ -126,9 +126,9 @@ EOF'
     export LLVM_CONFIG="/usr/bin/llvm-config-6.0"
   fi
   # update cmake to build ROOT
-  URL="https://cmake.org/files/v3.15/cmake-3.15.3-Linux-x86_64.tar.gz"
-  DownloadTarAndExtract $URL $WORKING_DIR/cmake-3.15.3 1
-  export PATH=$WORKING_DIR/cmake-3.15.3/bin:$PATH
+  URL="https://cmake.org/files/v3.17/cmake-3.17.0-Linux-x86_64.tar.gz"
+  DownloadTarAndExtract $URL $WORKING_DIR/cmake-3.17.0 1
+  export PATH=$WORKING_DIR/cmake-3.17.0/bin:$PATH
 
   # Install pyenv and python 3.6.9
   curl https://pyenv.run | bash
