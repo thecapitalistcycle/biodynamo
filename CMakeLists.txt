@@ -267,7 +267,7 @@ if(paraview)
 
     # Check the first time if ParaView exists in the system.
     find_package(ParaView 5.8 CONFIG COMPONENTS Catalyst PythonCatalyst VTKExtensionsIOCore
-            PATHS ${CMAKE_THIRD_PARTY_DIR}/paraview)
+            PATHS ${CMAKE_THIRD_PARTY_DIR}/paraview ENV{ParaView_DIR})
 
     # Check if ParaView was found in the system. If that's not the case then we will proceed
     # to download it.
