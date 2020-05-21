@@ -67,7 +67,7 @@ sudo apt-get install -y libssl-dev zlib1g-dev libbz2-dev libreadline-dev \
 curl https://pyenv.run | bash
 export PATH="$HOME/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
-env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.6.9
+PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.6.9
 ```
 
 We install pyenv as the Python Version Management to be able to switch
@@ -132,7 +132,7 @@ sudo yum install -y @development zlib-devel bzip2 bzip2-devel readline-devel sql
 curl https://pyenv.run | bash
 export PATH="$HOME/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
-env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.6.9
+PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.6.9
 ```
 #### Optional Packages
 ```bash
@@ -188,7 +188,7 @@ brew upgrade python cmake || true
 
 # Install Python 3.6.9 environment
 eval "$(pyenv init -)"
-env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.6.9
+PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.6.9
 ```
 
 #### Optional Packages

@@ -134,7 +134,7 @@ EOF'
   curl https://pyenv.run | bash
   export PATH="$HOME/.pyenv/bin:$PATH"
   eval "$(pyenv init -)"
-  env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.6.9
+  PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.6.9
   pyenv shell 3.6.9
 
 else
@@ -154,6 +154,6 @@ else
   curl https://pyenv.run | bash
   export PATH="$HOME/.pyenv/bin:$PATH"
   eval "$(pyenv init -)"
-  env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.6.9
+  PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.6.9
   pyenv shell 3.6.9
 fi
