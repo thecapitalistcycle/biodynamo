@@ -22,7 +22,6 @@
 #include "core/biology_module/regulate_genes.h"
 #include "core/event/cell_division_event.h"
 #include "core/event/event.h"
-#include "core/grid.h"
 #include "core/model_initializer.h"
 #include "core/param/command_line_options.h"
 #include "core/param/param.h"
