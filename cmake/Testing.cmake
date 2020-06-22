@@ -75,9 +75,9 @@ function(bdm_add_test_executable TEST_TARGET)
 
   # add valgrind test
   if (valgrind AND VALGRIND_FOUND AND NOT coverage)
-    # filter out SchedulerTest.Backup because of timing issue
+    # filter out tests that would take too long if tested under valgrind 
     add_test(NAME "valgrind_${TEST_TARGET}"
-      COMMAND  ${CMAKE_BINARY_DIR}/launcher.sh ${CMAKE_SOURCE_DIR}/util/valgrind.sh ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_TARGET} -- --gtest_filter=-*DeathTest.*:IOTest.InvalidRead:SchedulerTest.Backup:ResourceManagerTest.SortAndApplyOnAllElementsParallel*:InlineVector*:NeuriteElementBehaviour.*:MechanicalInteraction.*:ParaviewFullCyleTest*)
+      COMMAND  ${CMAKE_BINARY_DIR}/launcher.sh ${CMAKE_SOURCE_DIR}/util/valgrind.sh ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_TARGET} -- --gtest_filter=-*DeathTest.*:IOTest.InvalidRead:SchedulerTest.Backup:ResourceManagerTest.SortAndApplyOnAllElementsParallel*:InlineVector*:NeuriteElementBehaviour.*:MechanicalInteraction.*:ParaviewIntegrationTest*)
   endif()
 
   add_dependencies(check ${TEST_TARGET})
