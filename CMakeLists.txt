@@ -518,7 +518,7 @@ add_dependencies(bdmclean libbdmclean)
 generate_rootlogon()
 
 if(paraview)
-    include("${CMAKE_SOURCE_DIR}/paraview_plugin/CMakeLists.txt")
+    add_subdirectory("${CMAKE_SOURCE_DIR}/paraview_plugin/" EXCLUDE_FROM_ALL)
 endif()
 
 # create cmake files used by external builds
